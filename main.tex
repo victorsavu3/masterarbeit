@@ -1,0 +1,49 @@
+\documentclass[a4paper,12pt]{book}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+
+\begin{document}
+
+\author{TeXstudio Team}
+\title{Simple Book Example}
+
+\frontmatter
+
+\begin{titlepage}
+
+\begin{center}
+	\bigskip \bigskip \bigskip 
+	\begin{figure}[ht]
+		\centering \includegraphics[width=0.2\linewidth]{logo.png}
+	\end{figure}
+	\vspace*{0.8cm}
+	{\huge \bf Technische Universität} \\
+	\bigskip
+	{\huge \bf München} \\
+	\bigskip \bigskip \bigskip
+	{\huge \bf Department of Informatics} \\
+	\bigskip \bigskip \bigskip
+	{\Large \bf Master's Thesis} \\
+	\bigskip \bigskip \bigskip \bigskip \bigskip
+	{\Large Title} \\        
+	\bigskip \bigskip \bigskip \bigskip
+	{\Large Savu Victor-Gabriel} \\    
+	\bigskip
+	\begin{figure}[ht]
+		\centering \includegraphics[width=0.2\linewidth]{infologo.jpg}
+	\end{figure}
+	\bigskip 
+\end{center}
+
+\end{titlepage}
+
+\tableofcontents
+
+\mainmatter
+\include{./TeX_files/chapter01}
+\include{./TeX_files/chapter02}
+
+\backmatter
+% bibliography, glossary and index would go here.
+
+\end{document}
