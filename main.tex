@@ -1,11 +1,11 @@
 \documentclass[a4paper,12pt]{book}
 \usepackage[utf8]{inputenc}
+
 \usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{minted}
 
 \begin{document}
-
-\author{TeXstudio Team}
-\title{Simple Book Example}
 
 \frontmatter
 
@@ -25,7 +25,7 @@
 	\bigskip \bigskip \bigskip
 	{\Large \bf Master's Thesis} \\
 	\bigskip \bigskip \bigskip \bigskip \bigskip
-	{\Large Title} \\        
+	{\Large Framework for analysis of parallelization possibilities} \\        
 	\bigskip \bigskip \bigskip \bigskip
 	{\Large Savu Victor-Gabriel} \\    
 	\bigskip
@@ -42,8 +42,12 @@
 \mainmatter
 \include{./TeX_files/chapter01}
 \include{./TeX_files/chapter02}
+\include{./TeX_files/chapter03}
+\include{./TeX_files/chapter04}
+\include{./TeX_files/chapter05}
 
 \backmatter
-% bibliography, glossary and index would go here.
+\bibliography{master}{}
+\bibliographystyle{plain}
 
 \end{document}
