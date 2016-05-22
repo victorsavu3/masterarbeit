@@ -1,8 +1,31 @@
-\chapter{Example}
+\chapter{Background}
 
-\section {Introduction}
-\subsection{Concepts}
-\subsection{Example programs}
-\section {User Work flow}
-\section {Section Analysis}
-\section {Pipeline Analysis}
+\section {Parallelization}
+
+\section {Dynamic Binary Instrumentation}
+
+Binary instrumentation is a method to analyze and alter the dynamic behavior of an application by modifying its instructions. By inserting monitoring code it is possible to gain insight into the state of an application at any point during its execution, allowing powerful dynamic analysis tools to be created. In contrast to static analysis, dynamic binary instrumentation focuses on a concrete execution of a program. This provides a very detailed insight into the program, but it does not exercise all possible code paths.
+
+Dynamic binary instrumentation also makes it possible to alter the state of a running program. Tools can implement automatic fault injection \cite{faultinject}, dynamic transactional memory \cite{dynamicstm} or improve security \cite{dynamicstackprotect}.
+
+Multiple mature frameworks for dynamic binary instrumentation technique exist such as Intel Pin \cite{pin}, Valgrind \cite{valgrind} and Dyninst \cite{dyninst}. This thesis focuses on Intel Pin, as it is used for our implementation.
+
+\subsection{Intel Pin}
+
+Intel Pin \cite{pin} is a instrumentation framework that can be used to build a large variety of tools for Windows and Linux. The implementation is focused on ease-of-use and provides a very simple but powerful API that allows tools to instrument any instruction in a program.
+
+Pin uses a just-in-time compiler to insert code into an application efficiently. A tool must implement analysis routines that are inserted into the program and instrumentation routines that determine where the insertion will take place. This allows programmers to avoid the intermediate representation and Pin to automatically optimize the instrumentations.
+
+\subsection{Fast Buffers}
+
+Tools that perform dynamic analysis execute two separate tasks, data collection and data analysis. The Intel Pin Fast Buffering APIs \cite{pinbuffer} aim to decouple these tasks in order to reduce the overhead associated with dynamic binary instrumentation. This is implemented by collecting multiple chunks of data and processing them only when the buffer used to store them is full.
+
+
+
+\subsection{Parceive}
+\section {Data Model}
+\subsection{SQLite}
+\section {Visualizations}
+\subsection {SVG}
+\subsection {Javascript}
+\subsection {Parceive UI}
