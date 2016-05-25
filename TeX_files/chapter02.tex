@@ -6,50 +6,75 @@
 
 \subsection{Introduction}
 
-Binary instrumentation is a method to analyze and alter the dynamic behavior of an application by modifying its instructions at runtime. 
+Dynamic binary instrumentation is a method to analyze and alter the dynamic behavior of an application by modifying its instructions at runtime. This method makes it possible to gain insight into the state of a running program at any point in time and can also allow tools to alter that state. Dynamic binary instrumentation is used to follow a specific path trough an applications and is by no means exhaustive.
 
+Most tools developed using this method are designed to obtain information about an application. For example tools such as MemTrace \cite{pindoc} and Memcheck \cite{memcheck} help discover and correct memory problems. Intel Advisor \cite{inteladvisor} and the tools described in this thesis aid in parallelization endevours.
 
-By inserting monitoring code it is possible to gain insight into the state of an application at any point during its execution, allowing powerful dynamic analysis tools to be created. In contrast to static analysis, dynamic binary instrumentation focuses on a concrete execution of a program. This provides a very detailed insight into the program, but it does not exercise all possible code paths.
-
-Dynamic binary instrumentation also makes it possible to alter the state of a running program. Tools can implement automatic fault injection \cite{faultinject}, dynamic transactional memory \cite{dynamicstm} or improve security \cite{dynamicstackprotect}.
+Dynamic binary instrumentation can also be used to alter the state of a running program. Tools have implemented automatic fault injection \cite{faultinject}, dynamic transactional memory \cite{dynamicstm} and improvements to security \cite{dynamicstackprotect}.
 
 \subsection{Implementations}
+
 \subsubsection{Valgrind}
 
 Valgrind \cite{valgrind} is an open-source dynamic binary instrumentation framework that is used to create a number of powerful and diverse tools. It focuses on using shadow values to implement complex tools, that are difficult to develop with other frameworks. Unfortunately simple tools need a complex implementation and have a considerable overhead.
 
 \subsubsection{Dyninst}
 
-Dyninst \cite{dyninst} is a framework developed at the University of Maryland that performs dynamic binary instrumentation on a target application. The goal of this project is to abstract machine code in order to create simple portable tools. Multiple tools have been implemented using Dyninst such as VampirTrace \cite{vampirtrace}.
+Dyninst \cite{dyninst} is a framework developed at the University of Maryland that performs dynamic binary instrumentation on a target application. The goal of this project is to abstract away machine code in order to create simple and portable tools. Multiple projects have been implemented using Dyninst such as VampirTrace \cite{vampirtrace}.
 
 \subsubsection{Intel Pin}
 
 Intel Pin \cite{pin} is a instrumentation framework that can be used to build a large variety of tools for Windows and Linux. The implementation is focused on ease-of-use and provides a very simple but powerful API that allows tools to instrument any instruction in a program.
 
+\subsubsection{Example tools}
+
+\emph{Memcheck} \cite{memcheck} is a tool developed as part of Valgrind that detects common C and C++ memory errors. It is able to report accesses to unallocated or uninitialized memory, incorrect usage of allocations or deallocations and memory leaks.
+
+\emph{Intel Advisor} \cite{inteladvisor} is a collection of related tools based on Intel Pin that focus on helping developers parallelize applications. It is able to predict possible improvements when applying vectorisation and thread parallelism to applications.
+
 \subsection{Overhead}
+
+Unfortunately dynamic binary instrumentation entails a performance overhead when running programs. Valgrind for example runs programs 4.3x slower \cite{valgrind} even when not performing any kind of analysis. The slowdown becomes more substantial (22.1x) when executing a proper tool.
+
+The overhead of the instrumentation can be split up in tow parts, modification of the target program and the execution of additional instructions. Tools such as Valgrind and Intel Pin also utilize a just-in-time virtual machine to execute the target, which creates an additional overhead. In \cite{instoverhead} there is a breakdown of time and instruction count when running an application with Intel Pin and performing an analysis.
 
 \subsection{Alternatives}
 
-Static analysis tools such as the Clang Static Analyser \cite{clang} or Coverity \cite{coverity} are able to identify potential faults in an application by inspecting its source code. This type of scrutiny considers all possible paths an application can potentially follow. This will detect problems in code that is rarely tested, but can also make it very computationally intensive. In contrast to this dynamic analysis only follows a single path trough the application, but it can find many more issues with this execution.
+Static analysis tools such as the Clang Static Analyser \cite{clang} or Coverity \cite{coverity} are able to identify potential faults in an application by inspecting its source code. This type of scrutiny considers all possible paths an application can potentially follow. This will detect problems in code that is rarely tested, but can also make it very computationally intensive. In contrast to this dynamic analysis only follows a single path trough the application, but it can find many more issues with this one particular execution.
 
-Code instrumentation tools such as the Intel Advisor \cite{inteladvisor} allow a software developer to insert instrumentations into the source code of the application. Running analyses on the application becomes a cycle of editing the source code, rebuilding and then running. This cycle can be too restrictive when working with an existing application that depends on a convoluted build system.
+Code instrumentation tools such as the Intel Advisor \cite{inteladvisor} allow a software developer to insert instrumentations into the source code of the application. Running analyses on the application becomes a cycle of editing the source code, rebuilding and then running. This cycle can be too restrictive when working with an existing application that depends on a convoluted build system. Binary instrumentation works with the compiled application directly and does not require the developer to perform rebuilds.
 
 Static binary instrumentation tools such as PEBIL \cite{pebil} alter an application executable by changing the instructions contained within. The new program can then be executed normally. This method can provide some performance benefits, but not in all cases as can be seen in \cite{pebilperf}. The drawback of these tools is the lack of flexibility when instrumenting as it is not possible to change instructions at runtime.
 
-
 \subsection{Intel Pin}
 
-Pin uses a just-in-time compiler to insert code into an application efficiently. A tool must implement analysis routines that are inserted into the program and instrumentation routines that determine where the insertion will take place. This allows programmers to avoid the intermediate representation and Pin to automatically optimize the instrumentations.
+The implementation of the tools presented in this thesis ares based on Intel Pin. This framework has been chosen because of the simple API, performance, good documentation and the flexibility when performing instrumentation.
+
+\subsubsection{API}
+
+The Pin API \cite{pindoc} simplifies the development of tools by providing two types of callbacks. Instrumentation routines are called when the tools must process parts of the target program. Analysis routines are the instrumentations that are called during the program execution. All routines are developed using standard C/C++ and can also take advantage of any existing library.
+
+Two of the most interesting instrumentation routines are trace callbacks and image callbacks. A image callback is called when the application or a shared library is loaded and allow the tool to instrument functions as they are detected in the executable code. A trace callback is called when the JIT compiler encounters new code and allows the tool to insert instrumentations into the instruction stream.
+
+Instrumentation routines insert calls to analysis routines in order to acquire information or to modify the program state. Pin attempts to reduce the overhead of inserted code by automatically optimizing the analysis routines and the calling site.
+
+The provided API allows a tool to perform a very granular analysis without the need to go trough a intermediate representation of the instruction stream. This greatly simplifies development and makes it possible to optimize the instrumentation.
+
+\subsubsection{Documentation}
+
+Intel Pin provides a comprehensive documentation \cite{pindoc} and a large number of examples as part of its distribution. The provided samples illustrate the different classes of tools that can be developed using the framework.
 
 \subsubsection{Fast Buffers}
 
-Tools that perform dynamic analysis execute two separate tasks, data collection and data analysis. The Intel Pin Fast Buffering APIs \cite{pinbuffer} aim to decouple these tasks in order to reduce the overhead associated with dynamic binary instrumentation. This is implemented by collecting multiple chunks of data and processing them only when the buffer used to store them is full.
+The Intel Pin Fast Buffering API \cite{pinbuffer} aims to decouple information collection from processing in order to reduce the overhead associated with dynamic binary instrumentation. This is implemented by collecting multiple chunks of data and processing them only when the buffer used to store them is full.
 
+The greatest benefit of using the Intel Pin Fast Buffering API is the increased performance when performing analyses on applications \cite{pinbuffer}. This comes at the cost of being unable to alter the application state during execution. The tools developed as part of this thesis need to change the application behavior and are implemented using this API.
 
+The provided API is similar to the standard Pin API \cite{pindoc}. Instrumentation routines remain unchanged, but it is not possible to insert instrumentations into the program outside trace instrumentation. Buffer allocation and management is performed automatically by Pin and the tool only needs to define a buffer with a callback to handle the data processing. Information gathering is performed by instrumentation code generated by Pin ans can examine any aspect of the application state.
 
-\subsection{Parceive}
-\section {Data Model}
 \subsection{SQLite}
+
+\section{Parceive}
 \section {Visualizations}
 \subsection {SVG}
 \subsection {Javascript}
