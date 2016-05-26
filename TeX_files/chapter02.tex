@@ -8,7 +8,7 @@
 
 Dynamic binary instrumentation is a method to analyze and alter the dynamic behavior of an application by modifying its instructions at runtime. This method makes it possible to gain insight into the state of a running program at any point in time and can also allow tools to alter that state. Dynamic binary instrumentation is used to follow a specific path trough an applications and is by no means exhaustive.
 
-Most tools developed using this method are designed to obtain information about an application. For example tools such as MemTrace \cite{pindoc} and Memcheck \cite{memcheck} help discover and correct memory problems. Intel Advisor \cite{inteladvisor} and the tools described in this thesis aid in parallelization endevours.
+Most tools developed using this method are designed to obtain information about an application. For example MemTrace \cite{pindoc} and Memcheck \cite{memcheck} help discover and correct memory problems. Intel Advisor \cite{inteladvisor} and the tools described in this thesis aid in parallelization endevours.
 
 Dynamic binary instrumentation can also be used to alter the state of a running program. Tools have implemented automatic fault injection \cite{faultinject}, dynamic transactional memory \cite{dynamicstm} and improvements to security \cite{dynamicstackprotect}.
 
@@ -16,11 +16,11 @@ Dynamic binary instrumentation can also be used to alter the state of a running 
 
 \subsubsection{Valgrind}
 
-Valgrind \cite{valgrind} is an open-source dynamic binary instrumentation framework that is used to create a number of powerful and diverse tools. It focuses on using shadow values to implement complex tools, that are difficult to develop with other frameworks. Unfortunately simple tools need a complex implementation and have a considerable overhead.
+Valgrind \cite{valgrind} is an open-source dynamic binary instrumentation framework that is used to perform a number of powerful and diverse analyses. It focuses on using shadow values to implement complex tools, that are difficult to develop with other frameworks. Unfortunately simple tools require a complex implementation and have a considerable overhead.
 
 \subsubsection{Dyninst}
 
-Dyninst \cite{dyninst} is a framework developed at the University of Maryland that performs dynamic binary instrumentation on a target application. The goal of this project is to abstract away machine code in order to create simple and portable tools. Multiple projects have been implemented using Dyninst such as VampirTrace \cite{vampirtrace}.
+Dyninst \cite{dyninst} is a framework developed at the University of Maryland that performs dynamic binary instrumentation on a target application. The goal of this project is to abstract away machine code in order to create simple and portable tools. Multiple projects have taken advantage of Dyninst, for exaple VampirTrace \cite{vampirtrace}.
 
 \subsubsection{Intel Pin}
 
@@ -42,7 +42,7 @@ The overhead of the instrumentation can be split up in tow parts, modification o
 
 Static analysis tools such as the Clang Static Analyser \cite{clang} or Coverity \cite{coverity} are able to identify potential faults in an application by inspecting its source code. This type of scrutiny considers all possible paths an application can potentially follow. This will detect problems in code that is rarely tested, but can also make it very computationally intensive. In contrast to this dynamic analysis only follows a single path trough the application, but it can find many more issues with this one particular execution.
 
-Code instrumentation tools such as the Intel Advisor \cite{inteladvisor} allow a software developer to insert instrumentations into the source code of the application. Running analyses on the application becomes a cycle of editing the source code, rebuilding and then running. This cycle can be too restrictive when working with an existing application that depends on a convoluted build system. Binary instrumentation works with the compiled application directly and does not require the developer to perform rebuilds.
+Code instrumentation tools such as the Intel Advisor \cite{inteladvisor} allow a software developer to insert instrumentations into the source code of the application. Running analyses on the application becomes a cycle of editing the source code, rebuilding and then running. This cycle can be too restrictive when working with an existing application that depends on a convoluted build process. Binary instrumentation works with the compiled application directly and does not require the developer to perform rebuilds.
 
 Static binary instrumentation tools such as PEBIL \cite{pebil} alter an application executable by changing the instructions contained within. The new program can then be executed normally. This method can provide some performance benefits, but not in all cases as can be seen in \cite{pebilperf}. The drawback of these tools is the lack of flexibility when instrumenting as it is not possible to change instructions at runtime.
 
@@ -70,7 +70,7 @@ The Intel Pin Fast Buffering API \cite{pinbuffer} aims to decouple information c
 
 The greatest benefit of using the Intel Pin Fast Buffering API is the increased performance when performing analyses on applications \cite{pinbuffer}. This comes at the cost of being unable to alter the application state during execution. The tools developed as part of this thesis need to change the application behavior and are implemented using this API.
 
-The provided API is similar to the standard Pin API \cite{pindoc}. Instrumentation routines remain unchanged, but it is not possible to insert instrumentations into the program outside trace instrumentation. Buffer allocation and management is performed automatically by Pin and the tool only needs to define a buffer with a callback to handle the data processing. Information gathering is performed by instrumentation code generated by Pin ans can examine any aspect of the application state.
+The provided API is similar to the standard Pin API \cite{pindoc}. Instrumentation routines remain unchanged, but it is not possible to insert instrumentations into the program outside trace instrumentation. Buffer allocation and management is performed automatically by Pin and the tool only needs to define a buffer with a callback to handle the data processing. Information gathering is performed by instrumentation code generated by Pin and can examine any aspect of the application state.
 
 \section{SQLite}
 
@@ -82,25 +82,25 @@ SQLite stores the entire database in a single file. This file contains the schem
 
 TODO Performance
 
-The tools implemented as part of this thesis store data as a SQLite database. This allows results of an application trace to be easily manipulated, while maintaining a high degree of performance. Additional analysis can be easily performed on the database by using standard SQL statements, as will be presented in Section \ref{parceiveui}.
+Parceive and the tools implemented as part of this thesis store data as a SQLite database. This allows results of an application trace to be easily manipulated, while maintaining a high degree of performance. Additional analysis can be easily performed on the database by using standard SQL statements, as will be presented in Section \ref{dataprocessing}.
 
 \section {Visualizations}
 
-Gathering large amounts of data about an applications does benefit any user if it can not be navigated or condensed into an useful form. A graphic visual representation of the data makes it possible to derive useful knowledge about a program.
+Gathering large amounts of data about an applications does not benefit an user if it can not be navigated or condensed into an useful form. A graphic visual representation of data makes it possible to intuitively derive useful knowledge about a program.
 
 \subsection {SVG}
 
-SVG \cite{svg11} is a vector image format based on XML designed for two-dimensional graphics based on a open Web standard. It can be easily integrated into HTML and supports interactivity and complex animations. Since 2011 most browsers implement native support for SVG.
+SVG \cite{svg11} is a vector image format based on XML designed for two-dimensional graphics based on an open web standard. It can be easily integrated into HTML and supports interactivity and complex animations. Since 2011 most browsers implement native support for SVG.
 
 Many visualization frameworks have been developed to work with SVG inside browsers such as D3, Vega, Processing or dygraphs. The standard provides all primitives required to implement any kind of 2D visualization. Interactivity and animations are possible with javascript as SVG documents are part of the Document Object Model.
 
-The most important features of SVG associated with visualizations are:
+The most important features of SVG used by visualizations are:
 
 \begin{itemize}
 	\item[Paths] allow arbitrary shapes to be defined
 	\item[Basic shapes] such as lines, circles and rectangles
-	\item[Text elements] makes it easy to insert text in a visualization
-	\item[Groups] allows easy and efficient manipulation of multiple elements
+	\item[Text elements] make it easy to insert text in a visualization
+	\item[Groups] allow easy and efficient manipulation of multiple elements
 	\item[Interactivity] implemented with the use of events and the DOM
 	\item[Animations] possible with CSS, Javascript or built-in elements
 	\item[Linking] allows references to other parts of the document
@@ -114,49 +114,7 @@ Parceive \cite{parceive} is a tracing-based tool for parallelizing existing sequ
 
 \subsection{Architecture}
 
-In Figure \ref{parceive:architecture} we can see the overall architecture of the Parceive project. Parceive is based on Intel Pin and is designed to store a trace of the application in a SQLite database. This database is then processed to improve the performance of views that access information from it. A simple NodeJS is implementet as a bridge between the browser and the database. Views access data using a Object Relational Mapping that performs multiple optimizations to improve throughput. The view framework organizes the display of views on the page and implements state management.
-
-\subsection{Pin tool}
-
-Parceive is the data gathering component of the project. It traces the run of an application and stores its the function calls, memory accesses and loop executions in a SQLite database. The size of the result can be reduced by applying filters at the image, source file and function level.
-
-This tool also performs variable name resolution using DWARF or DebugHelp information present in the executable. This greatly improves the quality of the information available to visualizations.
-
-\subsection{Database layout}
-
-The database layout used by Parceive is closely related to the entities available in the Pin API and is very simple as can be see in Figure \ref{parceive:layout}. In this section we will explain what each table contains and how entities are related to each other.
-
-An Image is the program executable or a shared library loaded by it and can contain multiple functions and source files. The Call Table contains information about all the unfiltered function calls made by the application. A call consists of multiple segments which contain actual instructions. Segments are used to indicate loops inside calls. If a segment is part of a loop a corresponding LoopIteration entry exists to store details. Loop iterations are grouped into loop executions so the different loops can be identified. Static information about loops is stored in the Loop table
-
-Instructions are only stored when they access memory, call a function, create a thread or allocate memory. A instruction can access multiple memeory locations and in different ways. The Reference table contains interesting memory slices and is populated using debug information or allocations. Currently arrays are stored as one single reference.
-
-\begin{sidewaysfigure}
-	\centering
-	\includegraphics[width=1\textwidth]{parceive-schema}
-	\caption{Parceive database layout}
-	\label{parceive:layout}
-\end{sidewaysfigure}
-
-\subsection{Database processing}
-
-The database layout and settings used by Parceive are highly optimized for fast writing. All the information required by the visualization can be obtained by using queries, but most of the operations will take a considerable amount of time to complete.
-
-Since no more data will be inserted into the database storing redundant information is not a problem. 
-
-\subsubsection{Examples}
-
-\subsubsection{Final layout}
-
-\begin{sidewaysfigure}
-	\centering
-	\includegraphics[width=0.8\textwidth]{full-schema}
-	\caption{Processed database layout}
-	\label{parceive:proclayout}
-\end{sidewaysfigure}
-
-\subsection{ORM}
-
-\subsection{View Framework}
+In Figure \ref{parceive:architecture} we can see the overall architecture of the Parceive project. Parceive is based on Intel Pin and is designed to store a trace of the application in a SQLite database. This database is then processed to improve the performance of visualizations that access information from it. A simple NodeJS acts as a bridge between the browser and the database. Views access data using a Object Relational Mapping that performs multiple optimizations to improve throughput. The visualization framework organizes the display of visualizations on the page and implements state management.
 
 \begin{sidewaysfigure}
 	\begin{tikzpicture}[auto, scale=0.6, node distance=1.5cm,>=latex']
@@ -192,3 +150,119 @@ Since no more data will be inserted into the database storing redundant informat
 	\caption{Parceive architecture}
 	\label{parceive:architecture}
 \end{sidewaysfigure}
+
+\subsection{Pin tool}
+
+Parceive is the data gathering component of the project. It traces the run of an application and stores its the function calls, memory accesses and loop executions in a SQLite database. The size of the result can be reduced by applying filters at the image, source file and function level.
+
+This tool also performs variable name resolution using DWARF or DebugHelp information present in the executable. This greatly improves the quality of the information available to visualizations.
+
+\subsection{Database layout}
+
+The database layout used by Parceive is closely related to the entities available in the Pin API and is very simple as can be see in Figure \ref{parceive:layout}. In this section we will briefly explain what each table contains and how entities are related to each other.
+
+An Image is the program executable or a shared library loaded by it and can contain multiple functions and source files. The Call table contains information about all the function calls made by the application. A call consists of multiple segments which contain actual instructions. Segments are used to indicate loops inside calls. If a segment is part of a loop a corresponding LoopIteration entry exists to store details. Loop iterations are grouped into loop executions to make it possible to differentiate the instances. Static information about loops is stored in the Loop table
+
+Instructions are only stored when they access memory, call a function, create a thread or allocate memory. A instruction can access multiple memeory locations and in different ways. The Reference table contains interesting memory slices and is populated using debug information or allocations. Currently arrays are stored as one single reference.
+
+\begin{sidewaysfigure}
+	\centering
+	\includegraphics[width=1\textwidth]{parceive-schema}
+	\caption{Parceive database layout}
+	\label{parceive:layout}
+\end{sidewaysfigure}
+
+\subsection{Database processing}
+\label{dataprocessing}
+
+The database layout and settings used by Parceive are highly optimized for fast writing. All the information required by the visualization can be obtained by using queries, but most of the operations will take a considerable amount of time to complete.
+
+The first problem with the database is that Parceive avoids the creation of indexes to improve write performance. Thus, the most important step of the database processing is the creation of multiple indexes to improve record lookup. All primary and foreign keys are indexed and some composite indexes are created to speed up specific queries.
+
+Since no additional data will be added to the database, inserting redundant data creates no overhead and does not increase the complexity. By adding additional fields and creating intermediary tables it is possible to avoid joins for most queries executed by the visualizations. 
+
+Executing \texttt{VACUUM} after all processing is done also improves performance by reducing the fragmentation of data stored inside tables. The increased locality of data reduces the execution time of most queries and has a considerable effect on ones that require a full table scan. \texttt{VACUUM} is also able to reduce the size of the processed database.
+
+The structure of a processed database can be see in Figure \ref{parceive:proclayout}.
+
+\subsubsection{Optimization examples}
+
+1. One of the most intuitive and beneficial information added to the database is the \texttt{Caller} field in the \texttt{Call} table. Obtaining the calls performed by one specific call normally requires a join on three tables \texttt{Call}, \texttt{Instruction} and \texttt{Segment} and can be completely avoided by this shortcut.
+
+2. Showing profiling information of a call would require querying all calls made. If loops are present most of the calls would be made to the same function. The creation of the \texttt{CallGroup} table reduces the number of entities returned considerably by grouping together all calls to the same function. A profiler can avoid the \texttt{Call} table completely by using \texttt{CallGroup}.
+
+3. SQL is not designed to handle tree structures such as the call graph present in an application. The \texttt{CallTree} and \texttt{CallGroupTree} tables contain a flattened representation of the graph that can be queried in a simple and readable manner. Complex queries only become possible by using of these intermediary tables. The following queries would require hours of processing time if not optimized:
+
+\begin{itemize}
+	\item The references accessed during the execution of a call
+	\item Loading an entire call graph at once
+\end{itemize}
+
+\subsubsection{Performance}
+
+Figure \ref{parceive:procperformance} shows the time and size overhead of processing databases generated by Parceive. The time required by this operation is negligible because loading most visualizations without the optimizations would waste more than the processing itself. The executed queries are also heavily optimized making \texttt{VACUUM} and the creation of indexes the most time consuming operations. The size increase is unfortunately unavoidable.
+
+\begin{figure}
+	\centering
+	\begin{tabular}{l l l l}
+		Database & Size & Processed Size & Time taken \\
+		emsim\_par & 3905536 & 14560256 & 8.77 s
+	\end{tabular}
+	\caption{Database processing performance}
+	\label{parceive:procperformance}
+\end{figure}
+
+\begin{sidewaysfigure}
+	\centering
+	\includegraphics[width=0.8\textwidth]{full-schema}
+	\caption{Processed database layout}
+	\label{parceive:proclayout}
+\end{sidewaysfigure}
+
+\subsection{NodeJS Server}
+
+Loading the entire database into the browser is not possible when the trace is too large. To solve this problem a simple NodeJS Server was developed to read data from a processed database on demand.
+
+The server exposes a very simple REST \cite{rest} API that only allows the retrieval of data. For security reasons all SQL queries are contained in this server and  arbitrary queries are not supported. The server makes use of multiple parallel reads to the same database to reduce the latency and throughput when large amounts of data is requested by the visualizations.
+
+\subsection{ORM}
+
+Visualizations developed within the Parceive architecture can employ a Object Relational Mapper to simplify development and improve performance. The ORM makes it possible to access entities and to easily navigate the relationships between them. The API is implemented using promises \cite{promises} simplifying the asynchronous and parallel behavior.
+
+The greatest benefit to using this ORM in visualizations is the possibility of applying optimizations to the data loading. The most important ones are caching and pipelining.
+
+Caching allows the ORM to avoid loading data that has been accessed before. Each time an entity is retrieved from the server it is saved and reused for subsequent requests. This optimization allows visualizations to focus more on data presentation instead of data retrieval.
+
+Pipelining combines multiple queries to the same endpoint into a single one. When requesting a large number of entities it can improve performance despite the limit on the number of parallel requests in browsers. This optimization is designed to greatly increase throughput at the cost of a response time increased by 10 milliseconds.
+
+\subsection{Visualization Framework}
+
+As part of the Parceive UI a visualization framework has been developed to handle the layout and communication of multiple visualizations. The implementation is based on AngularJS and it completely separates visualizations into separate applications.
+
+\subsubsection{Communication}
+
+Visualizations perform different tasks and allow the user to navigate the callgraph in different ways. Communication makes it possible to follow a chain of investigation along multiple visualizations. Currently there are three ways to communicate intent:
+
+\begin{itemize}
+	\item[Focus] brings entities to the attention of the user
+	\item[Mark] allows the creation of selections that are visible between visualizations
+	\item[Spot] replaces all the entities in a visualization with a new set
+	\item[Hover] brings entities to the attention of the user using opacity
+\end{itemize}
+
+\subsubsection{State management}
+
+The visualization framework also implements a centralized and persistent state management for visualizations. With the use of this feature it is possible to retain the state of views across page views.
+
+Currently the view layout and the marked nodes are stored as part of the state automatically. In addition to this each visualization can save tailored information at any time and retrieve it when rendering. Local storage is used to house all the state information making it persistent.
+
+\subsubsection{API}
+Each visualization is an AngularJS application and isolated from the others. The Visualization Framework is able to detect such applications by a special naming scheme and the interface they provide. A visualization must provide the following functions:
+
+\begin{itemize}
+	\item[render] is called when a views has to update its SVG element
+	\item[markedCb]
+	\item[spotCb]
+	\item[focusCb]
+	\item[hoverCb] are called to handle a communication between views
+\end{itemize}
