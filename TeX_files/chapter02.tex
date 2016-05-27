@@ -2,6 +2,27 @@
 
 \section {Parallelization}
 
+\subsection{Introduction}
+
+\subsection{Synchronization}
+
+\subsection{Ahmdahl's Law}
+
+Ahmdahl's Law \cite{amdahl} is a very coarse estimation for the possible speedup when running an application on multiple cores. The only parameters of the equation \ref{eq:ahmdahl} are $r_s$, the ratio of the sequential portions of the program, $n$, the number of processors, and $r_p$ the ratio of program code that can be run in parallel.
+
+\begin{equation} \label{eq:ahmdahl}
+	\begin{aligned}
+		Speedup &= \frac{1}{r_s + \frac{r_p}{n}} \\
+		r_s + r_p &= 1
+	\end{aligned}
+\end{equation}
+
+\subsection{Gustafson's law}
+
+Gustafson's law \cite{gustafson}
+
+\subsection{Steps to parallelize existing software}
+
 \section {Dynamic Binary Instrumentation}
 
 \subsection{Introduction}
@@ -86,7 +107,7 @@ Parceive and the tools implemented as part of this thesis store data as a SQLite
 
 \section {Visualizations}
 
-Gathering large amounts of data about an applications does not benefit an user if it can not be navigated or condensed into an useful form. A graphic visual representation of data makes it possible to intuitively derive useful knowledge about a program.
+Gathering large amounts of data about an applications does not benefit an user if it can not be navigated or condensed into an useful form. A graphic representation makes the information accessible and allows an user to reason about it.
 
 \subsection {SVG}
 
@@ -105,8 +126,6 @@ The most important features of SVG used by visualizations are:
 	\item[Animations] possible with CSS, Javascript or built-in elements
 	\item[Linking] allows references to other parts of the document
 \end{itemize}
-
-\subsection {Javascript}
 
 \section{Parceive}
 
@@ -175,11 +194,11 @@ Instructions are only stored when they access memory, call a function, create a 
 \subsection{Database processing}
 \label{dataprocessing}
 
-The database layout and settings used by Parceive are highly optimized for fast writing. All the information required by the visualization can be obtained by using queries, but most of the operations will take a considerable amount of time to complete.
+The database layout and settings used by Parceive are highly optimized for fast writing. All the information required by the visualization can be obtained by using queries, but most of the operations will take a disproportionate amount of time to complete.
 
 The first problem with the database is that Parceive avoids the creation of indexes to improve write performance. Thus, the most important step of the database processing is the creation of multiple indexes to improve record lookup. All primary and foreign keys are indexed and some composite indexes are created to speed up specific queries.
 
-Since no additional data will be added to the database, inserting redundant data creates no overhead and does not increase the complexity. By adding additional fields and creating intermediary tables it is possible to avoid joins for most queries executed by the visualizations. 
+Since no additional data will be added to the database, creating redundancy generates no overhead and does not increase the complexity. By adding additional fields and creating intermediary tables, it is possible to avoid joins for most queries executed by the visualizations.
 
 Executing \texttt{VACUUM} after all processing is done also improves performance by reducing the fragmentation of data stored inside tables. The increased locality of data reduces the execution time of most queries and has a considerable effect on ones that require a full table scan. \texttt{VACUUM} is also able to reduce the size of the processed database.
 
@@ -223,7 +242,7 @@ Figure \ref{parceive:procperformance} shows the time and size overhead of proces
 
 Loading the entire database into the browser is not possible when the trace is too large. To solve this problem a simple NodeJS Server was developed to read data from a processed database on demand.
 
-The server exposes a very simple REST \cite{rest} API that only allows the retrieval of data. For security reasons all SQL queries are contained in this server and  arbitrary queries are not supported. The server makes use of multiple parallel reads to the same database to reduce the latency and throughput when large amounts of data is requested by the visualizations.
+The server exposes a very simple REST \cite{rest} API that only allows the retrieval of data. For security reasons all SQL queries are contained in this server and  arbitrary queries are not supported. The implementation makes use of multiple parallel reads to the same database to reduce the latency and throughput when large amounts of data is requested by the visualizations.
 
 \subsection{ORM}
 
@@ -231,7 +250,7 @@ Visualizations developed within the Parceive architecture can employ a Object Re
 
 The greatest benefit to using this ORM in visualizations is the possibility of applying optimizations to the data loading. The most important ones are caching and pipelining.
 
-Caching allows the ORM to avoid loading data that has been accessed before. Each time an entity is retrieved from the server it is saved and reused for subsequent requests. This optimization allows visualizations to focus more on data presentation instead of data retrieval.
+Caching allows the ORM to avoid loading data that has been accessed before. Each time an entity is retrieved from the server it is saved and reused for subsequent requests. This optimization allows visualizations to focus more on data presentation instead of efficient data retrieval.
 
 Pipelining combines multiple queries to the same endpoint into a single one. When requesting a large number of entities it can improve performance despite the limit on the number of parallel requests in browsers. This optimization is designed to greatly increase throughput at the cost of a response time increased by 10 milliseconds.
 
