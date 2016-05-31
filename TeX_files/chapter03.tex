@@ -1,8 +1,99 @@
 \chapter{Implementation}
 
-\section{pintool\_static.so}
-\section{Source Code View and tagging}
-\section{pintool\_dynamic.so}
-\section{CCT View}
-\section{Section View}
-\section{Pipeline View}
+\section{Introduction}
+
+\subsection{Filtering}
+
+\subsection{Tags}
+
+\begin{itemize}
+	\item [Section] marks the boundaries of a section of code that can be executed in parallel.
+	\item [SectionTask] is a task inside a section. Each task can be run in parallel to any other task. When a new task is started, the old one is ended automatically.
+	\item [Pipeline] marks the boundaries of a section of code that can be executed in parallel using a pipeline architecture.
+	\item [PipelineIteration] represents one iteration of the pipeline.
+	\item [PipelineSection] is a section of a iteration. These sections can be run in parallel to different sections from different iterations.
+\end{itemize}
+
+\subsubsection{Controling tracing}
+Filtering can reduce the amount of data gathered during a programs execution, but tags can provide a even more flexible approach. By default calls are recorded and memory accesses are ignored, but this can be changed with the appropriate tags.
+
+\begin{itemize}
+	\item [IgnoreAll] stops all tracing.
+	\item [IgnoreCalls] stops the tracing of calls.
+	\item [IgnoreAccesses] stops the tracing of accesses.
+	\item [ProcessAll] forces the tracing of everything.
+	\item [ProcessCalls] forces the tracing of calls.
+	\item [ProcessAccesses] starts the tracing of accesses.
+\end{itemize}
+
+\begin{figure}
+	\begin{center}
+		\begin{minted}{c}
+			if (ignoreCalls)
+				processCallsComputed = false;
+			else if (processCalls)
+				processCallsComputed = true;
+			else if (interestingProgramPart)
+				processCallsComputed = true;
+			else
+				processCallsComputed = true;
+			
+			if (!processCallsComputed)
+				processAccessesComputed = false;
+			else if (ignoreAccesses)
+				processAccessesComputed = false;
+			else if (processAccesses)
+				processAccessesComputed = true;
+			else if (interestingProgramPart)
+				processAccessesComputed = true;
+			else
+				processAccessesComputed = false;
+		\end{minted}
+	\end{center}
+	\caption{Algorithm to determine if tracing is performed}
+	\label{cap2:tracealg}
+\end{figure}
+
+\subsection{Tools}
+
+\subsection{Analysis}
+\subsection{Visualizations}
+
+\section{Tools}
+
+\subsection{Database layout}
+
+\subsection{pintool\_static.so}
+\subsubsection{File View}
+\subsubsection{Tagging}
+
+\subsection{pintool\_dynamic.so}
+\subsubsection{Fast buffer API}
+\subsubsection{Allocation interception}
+\subsubsection{Shadow Stack}
+\subsubsection{Tagging implementation}
+\subsubsection{Memory accesses}
+\subsubsection{Reference resolution}
+
+\section{Analysis}
+
+\subsection{Section}
+\subsubsection{Introduction}
+\subsubsection{Parallelization}
+\subsubsection{Dependency detection}
+\subsubsection{Visualization}
+
+\subsection{Pipeline}
+\subsubsection{Introduction}
+\subsubsection{Parallelization}
+\subsubsection{Dependency detection}
+\subsubsection{Visualization}
+
+\subsection{Calling Context Tree}
+\subsubsection{Parceive UI}
+\subsubsection{Modifications}
+
+
+
+
+
