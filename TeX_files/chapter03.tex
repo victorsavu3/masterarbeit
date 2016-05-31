@@ -2,6 +2,14 @@
 
 \section{Introduction}
 
+\subsection{Tools}
+\subsection{Analysis}
+\subsection{Visualizations}
+\subsection{Workflow}
+\subsection{Architecture}
+
+\section{Concepts}
+
 \subsection{Filtering}
 
 \subsection{Tags}
@@ -14,7 +22,7 @@
 	\item [PipelineSection] is a section of a iteration. These sections can be run in parallel to different sections from different iterations.
 \end{itemize}
 
-\subsubsection{Controling tracing}
+\subsubsection{Controlling tracing}
 Filtering can reduce the amount of data gathered during a programs execution, but tags can provide a even more flexible approach. By default calls are recorded and memory accesses are ignored, but this can be changed with the appropriate tags.
 
 \begin{itemize}
@@ -54,26 +62,25 @@ Filtering can reduce the amount of data gathered during a programs execution, bu
 	\label{cap2:tracealg}
 \end{figure}
 
-\subsection{Tools}
-
-\subsection{Analysis}
-\subsection{Visualizations}
-
 \section{Tools}
 
 \subsection{Database layout}
 
 \subsection{pintool\_static.so}
+\subsubsection{Source Locations}
 \subsubsection{File View}
 \subsubsection{Tagging}
 
 \subsection{pintool\_dynamic.so}
+\subsubsection{Architecture}
 \subsubsection{Fast buffer API}
 \subsubsection{Allocation interception}
 \subsubsection{Shadow Stack}
 \subsubsection{Tagging implementation}
 \subsubsection{Memory accesses}
 \subsubsection{Reference resolution}
+\subsubsection{Thread handling}
+\subsubsection{Tag handling}
 
 \section{Analysis}
 

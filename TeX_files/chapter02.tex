@@ -4,7 +4,9 @@
 
 \subsection{Introduction}
 
-\subsection{Synchronization}
+Traditionally software has been designed for serial computation where instructions are executed one at a time on the same processor. Unfortunately single core performance in CPUs has stalled for the last 10 years as processor manufacturers focus on multi-core systems in order to increase overall performance \cite{procspeed2}.
+
+Flynn has proposed a taxonomy \cite{flyn} to classify parallel hardware. \textbf{SIMD} allows instructions to operate on multiple data elements at the same time. \textbf{MISD} is an uncommon architecture where multiple processors operate on the same data. This thesis is focused on \textbf{MIMD} where each processor executes different instructions and can operate on data independently.
 
 \subsection{Ahmdahl's Law}
 
@@ -17,11 +19,19 @@ Ahmdahl's Law \cite{amdahl} is a very coarse estimation for the possible speedup
 	\end{aligned}
 \end{equation}
 
-\subsection{Gustafson's law}
+More precise models have been proposed \cite{gustafson}, but in all of them it is clear that increasing performance requires more of the application to be executed in parallel.
 
-Gustafson's law \cite{gustafson}
+\subsection{Steps to parallelize existing sequential software}
 
-\subsection{Steps to parallelize existing software}
+\begin{enumerate}[\hspace{80pt}(P1)]
+	\item [Concurrency identification] A software developer or tool must determine what parts of the application can be run in parallel.
+	\item [Architecture redefinition] The parallel execution model for the application must be chosen.
+	\item [Parallelization] Implementing the Architecture.
+	\item [Validation and Verification] Manual and automated testing verifies the correctness of the modifications.
+	\item [Runtime analysis] The performance of the new system is evaluated
+\end{enumerate}
+
+This thesis is focused on the first step of parallelizing existing software. We provide a framework to evaluate the potential speedup and the feasibility of parallelizing parts of the application.
 
 \section {Dynamic Binary Instrumentation}
 
