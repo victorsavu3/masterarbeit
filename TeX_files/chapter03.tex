@@ -6,7 +6,22 @@
 \subsection{Analysis}
 \subsection{Visualizations}
 \subsection{Workflow}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1\textwidth]{workflow}
+	\caption{User workflow}
+	\label{workflow}
+\end{figure}
+
 \subsection{Architecture}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1\textwidth]{architecture}
+	\caption{System architecture}
+	\label{architecture}
+\end{figure}
 
 \section{Concepts}
 
@@ -104,15 +119,32 @@ Additionally existing views have been extended to provide more information about
 
 \subsection{Database layout}
 
-Additional tables have been added to the parceive database to store information about tags and the layout of the source code. The \texttt{SourceLocation} table contains all locations in the code that are referenced in the debug information and can be used for tags. \texttt{Tag} 
+Additional tables have been added to the parceive database to store information about tags and the layout of the source code. The \texttt{SourceLocation} table contains all locations in the code that are referenced in the debug information and can be used for tags.
 
 \subsection{pintool\_static.so}
+
+\texttt{pintool\_static.so} performs static analysis on the executable and all the loaded dynamic libraries to determine the relationship between the source code and the executable. The instrumented application is executed to discover the dynamic libraries loaded at runtime.
+
 \subsubsection{Source Locations}
+
+Performing the analysis generates a database of all locations where a tag can be inserted into the application source code. This information is important because it is not obvious which line of code results in executable instructions, especially at block boundaries.
+
 \subsubsection{File View}
+
+The File View can render the files that were used to build the instrumented application.
+
 \subsubsection{Tagging}
 
+The File View can tag sections of the source code to generate an input for the dynamic analysis. 
+
 \subsection{pintool\_dynamic.so}
+
+\texttt{pintool\_static.so} performs a dynamic analysis on the application.
+
 \subsubsection{Architecture}
+
+
+
 \subsubsection{Fast buffer API}
 \subsubsection{Allocation interception}
 \subsubsection{Shadow Stack}
