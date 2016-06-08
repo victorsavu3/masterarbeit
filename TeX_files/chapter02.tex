@@ -33,6 +33,50 @@ More precise models have been proposed \cite{gustafson}, but in all of them it i
 
 This thesis is focused on the first step of parallelizing existing software. We provide a framework to evaluate the potential speedup and the feasibility of parallelizing parts of the application.
 
+\subsection{Parallelization patterns}
+
+This thesis focuses on two parallelization patterns, data parallelism and pipeline parallelism.
+
+\subsubsection{Data parallelism}
+
+Data parallelism \cite{parbook} focuses on distributing the processing across different processors by splitting up the data into chunks. This method is able to achieve scalability by generating more parallelism as the amount of data grows.
+
+Data parallelism can be implemented using specialized instructions that operate on multiple items at the same time. This thesis focuses on thread parallelism where larger units of work are distributed across multiple processors.
+
+Figure \ref{cap2:datapar} shows how a sequential processing of data can be distributed among multiple nodes.
+
+\begin{figure}[!ht]
+	\centering
+	\begin{tabular}{ l | l | l | l | l}
+		R & P & W & & \\
+		\hline
+		R &  & P & W & \\
+		\hline
+		R &  & & P & W \\
+	\end{tabular}
+	\caption{Pipeline, R - read, P - proecess, W - write}
+	\label{cap2:datapar}
+\end{figure}
+
+\subsubsection{Pipeline parallelism}
+
+A pipeline \cite{parbook} is a linear sequence of processing stages that transform data. These stages must be applied in order, but the data can be split up into individual items and each item can be processed independently. As a simple example we consider file processing, where data is read, processed and written to another file. Individual iterations can not be run in parallel, but the io operations and the processing can be seen in Figure \ref{cap2:pipeline}.
+
+\begin{figure}[!ht]
+	\centering
+	\begin{tabular}{ l | l | l | l | l}
+		R & P & W & & \\
+		\hline
+		R &  & P & W & \\
+		\hline
+		R &  & & P & W \\
+	\end{tabular}
+	\caption{Pipeline, R - read, P - proecess, W - write}
+	\label{cap2:pipeline}
+\end{figure}
+
+The speedup obtained by a pipeline is limited by the number of parallel stages that can be implemented. For the example in Figure \ref{cap2:pipeline} this is 3. Increasing the number of processors above this value will not provide any additional performance benefits.
+
 \subsection{Dependencies}
 
 Sequential programs expect instructions to be executed in the order specified in the program. Parallelizing sections of programs violates this assumption and may cause unexpected behavior if the implicit dependencies between the tasks are not respected.
