@@ -45,16 +45,10 @@ Data parallelism can be implemented using specialized instructions that operate 
 
 Figure \ref{cap2:datapar} shows how a sequential processing of data can be distributed among multiple nodes.
 
-\begin{figure}[!ht]
+\begin{figure}
 	\centering
-	\begin{tabular}{ l | l | l | l | l}
-		R & P & W & & \\
-		\hline
-		R &  & P & W & \\
-		\hline
-		R &  & & P & W \\
-	\end{tabular}
-	\caption{Pipeline, R - read, P - proecess, W - write}
+	\includegraphics[width=1\textwidth]{seqtopar}
+	\caption{Distributing work}
 	\label{cap2:datapar}
 \end{figure}
 
@@ -167,7 +161,7 @@ In contrast to traditional RDBMS, SQLite is not based on a client/server archite
 
 SQLite stores the entire database in a single file. This file contains the schema, all data stored in tables and indexes. The storage format is platform agnostic which allows easy backup and sharing of an entire database.
 
-TODO Performance
+Compared to writing a text file using the standard library SQLite is between 30-50\% faster. This performance is achieved by a release build of a Intel Pin tool when writing to a database without indexes and by disabling journaling.
 
 Parceive and the tools implemented as part of this thesis store data as a SQLite database. This allows results of an application trace to be easily manipulated, while maintaining a high degree of performance. Additional analysis can be easily performed on the database by using standard SQL statements, as will be presented in Section \ref{dataprocessing}.
 

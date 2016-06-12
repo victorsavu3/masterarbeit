@@ -3,18 +3,36 @@
 \section{Introduction}
 
 \subsection{Tools}
+
+As part of this thesis two tools have been developed to gather information about an application:
+
+\texttt{pintool\_static.so} analyses the application and all its shared libraries and creates a database with all the locations in the source code where a tag can be placed. More details are present in Section \ref{cap3:pintoolstatic}.
+
+\texttt{pintool\_dynamic.so} is an Intel Pin tool that performs tracing of the target application. It uses the database created by \texttt{pintool\_static.so} and adds all the gathered information. The tool is extensively explained in Section \ref{cap3:pintooldynamic}.
+
 \subsection{Analysis}
+
+
 \subsection{Visualizations}
+
+The database created by \texttt{pintool\_dynamic.so} is compatible with the format used by Parceive, but it adds some additional data. Existing views continue to work and have been extended to display this additional information.
+
 \subsection{Workflow}
 
 \begin{figure}
 	\centering
 	\includegraphics[width=1\textwidth]{workflow}
 	\caption{User workflow}
-	\label{workflow}
+	\label{cap3:workflow}
 \end{figure}
 
+Figure \ref{cap3:workflow} shows the workflow when using our tools.  Because we are using dynamic binary instrumentation a user must first build the application executable. The static analysis needs to be executed every time the program is modified and rebuilt.
+
+The dynamic analysis can be executed multiple times to gather more information. First the user tags sections of the source code and runs the analysis. The visualizations provide useful information about the executed program and the user can choose to perform another analysis if more data is required.
+
 \subsection{Architecture}
+
+Figure \ref{architecture} shows the architecture of the entire project. It is similar to the one used by Parceive as shown in Figure \ref{parceive:architecture}.
 
 \begin{figure}
 	\centering
@@ -22,6 +40,8 @@
 	\caption{System architecture}
 	\label{architecture}
 \end{figure}
+
+The split between the dynamic and static analysis was needed because the user must be able to tag the source code of the application before tracing is performed. The database processing, the Node.js server and the ORM have been extended to support our use cases.
 
 \section{Concepts}
 
@@ -91,37 +111,12 @@ In Figure \ref{cap3:contralg} we can see the algorithm used to determine whether
 	\label{cap3:contralg}
 \end{figure}
 
-\subsection{Tools}
-
-As part of this thesis two tools have been developed: \texttt{pintool\_static.so} and \texttt{pintool\_dynamic.so}.
-
-\subsection{Analysis}
-
-\texttt{pintool\_dynamic.so} and the database processing analyze the information gathered during the tracing in order to provide insight into the program. 
-
-\subsection{Visualizations}
-
-Additional visualizations have been implemented to enable source code tagging and to display the information obtained by the analysis:
-
-\textbf{File View}
-
-\textbf{Tag List}
-
-\textbf{Section View}
-
-\textbf{Pipeline View}
-
-Additionally existing views have been extended to provide more information about tags:
-
-\textbf{Detail View}
-
-\textbf{CCT View}
-
-\subsection{Database layout}
+\section{Database layout}
 
 Additional tables have been added to the parceive database to store information about tags and the layout of the source code. The \texttt{SourceLocation} table contains all locations in the code that are referenced in the debug information and can be used for tags.
 
-\subsection{pintool\_static.so}
+\section{pintool\_static.so}
+\label{cap3:pintoolstatic}
 
 \texttt{pintool\_static.so} performs static analysis on the executable and all the loaded dynamic libraries to determine the relationship between the source code and the executable. The instrumented application is executed to discover the dynamic libraries loaded at runtime.
 
@@ -137,7 +132,8 @@ The File View can render the files that were used to build the instrumented appl
 
 The File View can tag sections of the source code to generate an input for the dynamic analysis. 
 
-\subsection{pintool\_dynamic.so}
+\section{pintool\_dynamic.so}
+\label{cap3:pintooldynamic}
 
 \texttt{pintool\_static.so} performs a dynamic analysis on the application.
 
@@ -171,6 +167,25 @@ The File View can tag sections of the source code to generate an input for the d
 \subsection{Calling Context Tree}
 \subsubsection{Parceive UI}
 \subsubsection{Modifications}
+
+\section{Visualizations}
+
+Additional visualizations have been implemented to enable source code tagging and to display the information obtained by the analysis:
+
+\textbf{File View}
+
+\textbf{Tag List}
+
+\textbf{Section View}
+
+\textbf{Pipeline View}
+
+Additionally existing views have been extended to provide more information about tags:
+
+\textbf{Detail View}
+
+\textbf{CCT View}
+
 
 
 
