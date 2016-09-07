@@ -161,7 +161,7 @@ In contrast to traditional RDBMS, SQLite is not based on a client/server archite
 
 SQLite stores the entire database in a single file. This file contains the schema, all data stored in tables and indexes. The storage format is platform agnostic which allows easy backup and sharing of an entire database.
 
-Compared to writing a text file using the standard library SQLite is between 30-50\% faster. This performance is achieved by a release build of a Intel Pin tool when writing to a database without indexes and by disabling journaling.
+Compared to writing a text file using the standard library SQLite is between 30-50\% faster. This performance is achieved by a release build of a Intel Pin tool when writing to a database without indexes and by disabling journaling running on our setup described in Appendix \ref{appendix:setup}.
 
 Parceive and the tools implemented as part of this thesis store data as a SQLite database. This allows results of an application trace to be easily manipulated, while maintaining a high degree of performance. Additional analysis can be easily performed on the database by using standard SQL statements, as will be presented in Section \ref{dataprocessing}.
 

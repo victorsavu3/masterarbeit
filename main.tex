@@ -10,12 +10,25 @@
 \usepackage{amssymb}
 \usepackage{enumerate}
 \usepackage{svg}
+\usepackage{listings}
+\usepackage[toc,page]{appendix}
 
 \usetikzlibrary{arrows}
 \usetikzlibrary{positioning}
 \usetikzlibrary{fit}
 
 \begin{document}
+	
+\lstdefinestyle{BashInputStyle}{
+	language=bash,
+	basicstyle=\small\sffamily,
+	frame=tb,
+	columns=fullflexible,
+	backgroundcolor=\color{yellow!20},
+	linewidth=0.9\linewidth,
+	xleftmargin=0.1\linewidth
+}
+	
 
 \frontmatter
 
@@ -56,7 +69,12 @@
 \include{./TeX_files/chapter04}
 \include{./TeX_files/chapter05}
 
+\begin{appendices}
+	\include{./TeX_files/hardware}
+\end{appendices}
+
 \backmatter
+
 \bibliography{master}{}
 \bibliographystyle{plain}
 

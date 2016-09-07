@@ -299,15 +299,17 @@ All accesses are instrumented, but only some are recorded in the database. This 
 
 \subsubsection{Reference resolution}
 
-Recording only addresses for memory accesses in the database is insufficient for analyses and users alike. This information must be related to the known memory references of the instrumented application.
+Recording only addresses for memory accesses in the database is insufficient for analyses and users alike. This information must be related to the known memory references of the instrumented application. Currently our tool does not parse DWARF information and only shows generated names for stack and global variables.
 
 Each \texttt{ThreadManager} is able to determine the memory reference that contains a specific address. This resolution is done in multiple steps:
 
 \begin{enumerate}
-	\item If the address is part of a known memory reference it is found and returned.
+	\item If the address is part of a known memory reference, that reference is returned.
 	\item Check whether the address is part of the stack of the current thread. If it is create a new stack reference and return it.
 	\item If both previous steps failed create a new global memory reference and return it.
 \end{enumerate}
+
+All memory allocations (\texttt{malloc}, \texttt{calloc}, \texttt{realloc}) and deallocations (\texttt{free}) are instrumented in order to determine their lifetimes. The only way this can be done reliably on linux with Intel Pin is to replace the functions completely with a wrapper that calls the actual implementations and stores information about each call.
 
 \section{Database writing}
 
@@ -341,11 +343,70 @@ Currently the \texttt{SQLWriter} class is focused almost completely on writing, 
 
 \section{Analysis}
 
+\subsection{Calling Context Tree}
+
+The CCT visualization can perform multiple basic analyses based on the information that is stored in the database. \texttt{pintool\_dynamic.so} is able to generate trace data required by them. The two most important ones are:
+
+\subsubsection{Shared references}
+
+Shared references analysis displays the shared references between multiple Calls, CallGroups, LoopExecutions and LoopIterations. This can be used to determine dependencies, but is very imprecise due to the fact that it does not consider any children of the processed entities.
+
+\subsubsection{Shared recursive references}
+
+Shared recursive references analysis improves upon the previous one by considering the entire call tree, but is limited to Calls and CallGroups.
+
+\subsubsection{Issues}
+
+\begin{enumerate}
+	\item The execution time of both analyses increases sharply with the number of references used by the entire application.
+	\item The detected dependencies can be false positives as the offset of the access within references is ignored. For example referencing different members of a structure will be falsely detected.
+	\item The analysis is very coarse, working only with calls and loops.
+\end{enumerate}
+
 \subsection{Section}
+
 \subsubsection{Introduction}
+
+\texttt{pintool\_dynamic.so} can perform a fine grained detection of data and control dependencies that need to be addressed when parallelizing software. The user must tag sections and tasks within the code and the tool can automatically determine what tasks access a common reference.
+
 \subsubsection{Parallelization}
+
+This analysis assumes a very simple architecture. All tasks execute in parallel, but are all spawned and joined within a specific section. The order of execution between the tasks is not deterministic and as such all accesses to shared resources must be synchronized.
+
 \subsubsection{Dependency detection}
+
+The dependency detection is performed during the trace instrumentation as performing it later requires additional data to be stored in the database. The analysis also considers the lifetime of references in order not to create false positives when accessing stack variables that are local to the task.
+
+Processing is performed during tracing and sequentially as each section is bound to a specific thread. First dependencies are determined as accesses to the same references, as is done by the CCT view. This ensures that the lifetimes of variables are taken into account. When a dependency is identified it is checked whether it has occurred on the same memory region to eliminate false positives. Lastly it is stored in the database for use by the visualization.
+
 \subsubsection{Visualization}
+
+The visualization for the section analysis renders two pieces of information that are relevant to the user. Firstly if shows the possible speedup when an ideal scheduling has een performed as can be seen in Figure \ref{cap3:sec:speedup} and the list of conflicts that need to be resolved in order to maintain correctness as can be seen in Figure \ref{cap3:sec:conflict}.
+
+The simulation of parallel execution performs ideal scheduling of tasks on a configurable number of processing cores. The actual performance benefit is strictly lower that the value presented, but it can be used to check whether the parallelization is worthwhile. 
+
+The list of conflicts is a simple table that lists all references that are accessed by different tasks. It integrates with the Detail view present in Parceive to shows where exactly the variable is accessed as can be seen in Figure \ref{cap3:sec:detail}.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1\textwidth]{section-speedup}
+	\caption{Possible speedup}
+	\label{cap3:sec:speedup}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.4\textwidth]{section-conflict}
+	\caption{Conflict list}
+	\label{cap3:sec:conflict}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1\textwidth]{section-detail}
+	\caption{Access locations for a reference}
+	\label{cap3:sec:detail}
+\end{figure}
 
 \subsection{Pipeline}
 \subsubsection{Introduction}
@@ -353,15 +414,15 @@ Currently the \texttt{SQLWriter} class is focused almost completely on writing, 
 \subsubsection{Dependency detection}
 \subsubsection{Visualization}
 
-\subsection{Calling Context Tree}
-\subsubsection{Parceive UI}
-\subsubsection{Modifications}
-
 \section{Visualizations}
 
 Additional visualizations have been implemented to enable source code tagging and to display the information obtained by the analysis:
 
 \textbf{File View}
+
+The File View present in Parceive has been replaced with a more thorough solution. By using a different code highlighting tool \cite{googleprettify} it has become possible to refer to individual line in the source file. The new implementation allows the creation of TagInstructions on all lines that can be correlated to instructions in the application.
+
+When working with a database that contains tracing information the visualization can be navigated more easily. Function definitions and calls are highlighted and can be focused in the source code view. This facilitates the edition of the tagging information for a new dynamic execution.
 
 \textbf{Tag List}
 
@@ -373,7 +434,25 @@ Additionally existing views have been extended to provide more information about
 
 \textbf{Detail View}
 
+As can be seen in Figure \ref{cap3:detail} the detail view has been extended to show information about tags. 
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1\textwidth]{detail-mod}
+	\caption{Detail View modification}
+	\label{cap3:detail}
+\end{figure}
+
 \textbf{CCT View}
+
+The CCT View shown in Figure \ref{cap3:cct} has been extended to highlight the calls that have been made by tagged code. The Detail View can then be used to show the specific tags.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1\textwidth]{cct-mod}
+	\caption{CCT View modification}
+	\label{cap3:cct}
+\end{figure}
 
 
 

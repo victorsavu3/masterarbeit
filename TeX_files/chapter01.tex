@@ -90,4 +90,126 @@ The section analysis that our framework provides is also possible in Intel Advis
 
 Intel Advisor offers many features not available in our tool such as vectorization and memory access pattern analysis. We expect the two tools to complement each other when trying to achieve the greatest performance gains.
 
+\section {Example}
+
+To better illustrate the use of our tools we will go trough a simple example that will be parallelized. The relevant code is shown in Figure \ref{cap1:emsim:seq}.
+
+\subsection {Static analysis}
+
+The first step a user must perform is the static analysis. This extracts all locations in the source code where a tag can be inserted. The application itself is executed in order to analyze all dynamic libraries that it uses.
+
+\subsection{Execution}
+
+\begin{lstlisting}[style=BashInputStyle]
+pin.sh -t libpintool\_static.so -db emsim.db -filter filter.yaml \
+  -- emsim_seq
+\end{lstlisting}
+
+This command starts pin and loads \texttt{libpintool\_static.so} as a tool. The result is saved in the \textbf{emsim.db} database. The command to start the application that is being instrumented follows \texttt{--}. The filter in Figure \ref{cap1:filter} is used to reduce the amount of work needed to be performed
+
+\begin{figure}
+	\begin{center}
+		\begin{minted}{yaml}
+image:
+  exclude:
+    - /lib64/*
+file:
+  exclude:
+    - /usr/include
+    - Unknown
+    - sqlite.c
+function:
+  exclude:
+  - _GLOBAL__*
+  - __static_initialization_and_destruction_0
+		\end{minted}
+	\end{center}
+	\caption{\texttt{filter.yaml} example}
+	\label{cap1:filter}
+\end{figure}
+
+On systems with a more recent kernel it is necessary to supply Pin with the \texttt{-ifeellucky} to avoid some ineffective version checks.
+
+\subsection {Tagging the code}
+
+First the database must be copied to the import folder of \texttt{parceive-ui} and processed:
+
+\begin{lstlisting}[style=BashInputStyle]
+gulp db
+\end{lstlisting}
+
+Then the UI can be started:
+
+\begin{lstlisting}[style=BashInputStyle]
+gulp server
+\end{lstlisting}
+
+Figure \ref{cap1:tagview} shows the UI to tag code. Using this interface 2 \textbf{Tags} are defined, \textit{Section 1} and \textit{Section 1 Task}. Three \textbf{TagInstructions} are then defined to delimit the sections of code.
+
+\textit{Section 1} has a \texttt{Start} at line 11 and a \texttt{Stop} at line 22. This encompasses the entire loop.  \textit{Section 1 Task} has only a \texttt{Start} at line 14. Each iteration a new task is started and the old one is automatically closed. Figure \ref{cap1:source} shows the generated \texttt{source.yaml}.
+
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[width=0.8\textwidth]{tagging-view}
+	\caption{UI for tagging}
+	\label{cap1:tagview}
+\end{figure}
+
+\begin{figure}
+	\begin{center}
+		\begin{minted}{json}
+{
+  "tags": [
+    { "name": "Section 1", "type": "Section" },
+    { "name": "Section 1 Task", "type": "Task" }
+  ],
+  "tagInstructions": [
+    { "tag": 1, "type": "Start", "location": 365 },
+    { "tag": 1, "type": "Stop", "location": 372 },
+    { "tag": 2, "type": "Start", "location": 367 }
+  ]
+}
+		\end{minted}
+	\end{center}
+	\caption{Generated source.yaml}
+	\label{cap1:source}
+\end{figure}
+
+\subsection {Dynamic analysis}
+
+With \texttt{source.yaml} containing the tagging information it is possible to execute the dynamic analysis:
+
+\begin{lstlisting}[style=BashInputStyle]
+pin.sh -t libpintool\_dynamic.so -db emsim.db -filter filter.yaml \ 
+  -source source.yaml -- emsim_seq em.db 1
+\end{lstlisting}
+
+The database from the static analysis is used for this execution and all the tracing and tag information is now stored within.
+
+\subsection {Existing Visualizations}
+
+The database must be imported again and all existing visualizations in \texttt{parceive-ui} continue to work as can be seen in Figure \ref{cap1:cct} and \ref{cap1:profiling}.
+
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[width=0.8\textwidth]{cct}
+	\caption{CCT View}
+	\label{cap1:cct}
+\end{figure}
+
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[width=0.8\textwidth]{profiling}
+	\caption{Profiling View}
+	\label{cap1:profiling}
+\end{figure}
+
+\subsection {Visualizations}
+
 \section {Outline}
+
+Chapter 2 provides an broad introduction into concepts and implementations that have made this thesis possible and worthwhile.
+
+In chapter 3 we present the implementation of \texttt{pintool\_static.so}, \texttt{pintool\_dynamic.so} and visualizations that display data from specialized analyses. New analyses and visualizations can be easily developed.
+
+Chapter 4 applies our tools to \texttt{cppcheck} \cite{cppcheck} and bzip \cite{bzip} compression. The first will show the utility of the section analysis and the latter of the pipeline analysis.

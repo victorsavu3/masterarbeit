@@ -1,7 +1,36 @@
-\chapter{Example}
+\chapter{Examples}
 
 \section {Introduction}
-\subsection{Concepts}
+
+We will present multiple examples to show how our tools can inspect the runtime behaiour of four applications: a trivial example application, emsim, cppcheck and bzip.
+
+\subsection{Applications}
+
+\subsection{Trivial example}
+
+The example shown in \ref{cap4:test2} shows a trivial application that performs a variety of memory operations on a dynamically allocated array and some stack variables. Table \ref{cap4:test2references} shows these memory locations as they are detected by our tool.
+
+\begin{figure}
+	\begin{center}
+		\inputminted[linenos, fontsize=\scriptsize]{c}{test2.c}
+	\end{center}
+	\caption{\texttt{test2.c}: Trivial example}
+	\label{cap4:test2}
+\end{figure}
+
+\begin{figure}
+	\begin{center}
+		\begin{tabular}{l l l}
+			Id & Size & Name \\
+			31 & 350 & fe2010 \\
+			32 & 8 & S: 7fff74714e28:-16:1 \\
+			33 & 4 & S: 7fff74714e24:-20:1 \\
+		\end{tabular}
+	\end{center}
+	\caption{\texttt{test2.c}: Trivial example references}
+	\label{cap4:test2references}
+\end{figure}
+
 \subsection{Example programs}
 \section {User Work flow}
 \section {Section Analysis}
