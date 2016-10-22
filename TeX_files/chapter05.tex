@@ -32,7 +32,7 @@ Intel Advisor offers many features not available in our tool such as vectorizati
 
 \section{Future Work}
 
-Even though our tools are useful in their current state, further work needs to be performed to improve their versatility and usability.
+Even though our framework is useful in their current state, further work needs to be performed to improve its versatility and usability.
 
 \subsection{Memory reference identification}
 
@@ -67,6 +67,14 @@ This feature will require us to accurately model the effects of system calls and
 \subsection{Other parallelization models}
 
 For this thesis we have implemented section and pipeline analysis, but it is easy to extend our tools to other parallelism models. Further development can enable the analysis of nested parallel patterns, reductions and automatic ordering of tasks performing pure computations based on data dependencies.
+
+\subsection{\texttt{pintool\_dynamic.so} analysis hooks}
+
+The easiest way currently to develop new tools is to process the resulting database. This is sufficient for many analyses, but the processing time required might be excessive.
+
+Both Section and Pipeline analyses perform computation while the application is being instrumented. This allows them to use the current state of the application to reduce the amount of processing required. New tools that need this kind of optimization will need to be integrated into \texttt{pintool\_dynamic.so}.
+
+It is possible to implement hooks into \texttt{pintool\_dynamic.so} to allow analyses to be developed independently from the main library. This will considerably reduce the difficulty of developing new tools.
 
 \section{Conclusion}
 

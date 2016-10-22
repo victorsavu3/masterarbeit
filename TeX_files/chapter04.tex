@@ -22,7 +22,7 @@ The example shown in \ref{cap4:test2} shows a trivial application that performs 
 	\begin{center}
 		\begin{tabular}{l l l}
 			Id & Size & Name \\
-			31 & 350 & fe2010 \\
+			31 & 250 & fe2010 \\
 			32 & 8 & S: 7fff74714e28:-16:1 \\
 			33 & 4 & S: 7fff74714e24:-20:1 \\
 		\end{tabular}
@@ -109,7 +109,8 @@ pin.sh -ifeellucky -t libpintool_pintestprobe.so -- <application>
 
 Parceive
 \begin{lstlisting}[style=BashInputStyle]
-pin.sh -ifeellucky -t parceive.so -- <application>
+pin.sh -ifeellucky -t libParceive.so -f filter.xml -b blacklist.xml
+	-db test.db -mode analyse -- <application>
 \end{lstlisting}
 
 Valgrind
@@ -120,18 +121,24 @@ valgrind <application>
 \texttt{pintool\_static.so}
 \begin{lstlisting}[style=BashInputStyle]
 pin.sh -ifeellucky -t libpintool_static.so
-	-db test.db -- <application>
+	-db test.db -filter filter.yaml -- <application>
 \end{lstlisting}
 
 \texttt{pintool\_dynamic.so}
 \begin{lstlisting}[style=BashInputStyle]
-pin.sh -ifeellucky -t libpintool_static.so
-	-db test.db -- <application>
+pin.sh -ifeellucky -t libpintool_dynamic.so -source tracksource.yaml
+	-db test.db -filter filter.yaml -- <application>
+\end{lstlisting}
+
+\texttt{pintool\_dynamic.so} No memory accesses saved
+\begin{lstlisting}[style=BashInputStyle]
+pin.sh -ifeellucky -t libpintool_static.so-source emptysource.yaml
+-db test.db -filter filter.yaml -- <application>
 \end{lstlisting}
 
 \subsection{Filters and tags}
 
-Filtering for our tools and Parceive has been enabled and is identical. System libraries and headers as well as sqlite have been excluded from analysis. Our tools have no tags configured, but will track all memory accesses by default similarly to Parceive. The exact filters and source.yaml can be seen in Figure \ref{cap4:compconfig}.
+Filtering for our tools and Parceive has been enabled and is identical. System libraries and headers as well as sqlite have been excluded from analysis. Our tools have no tags configured since their performance impact is negligible. Execution time \texttt{pintool\_dynamic.so} will be measured twice, once saving all memory accesses and once ignoring them. The first approach is most similar to Parceive. The exact filters and source.yaml can be seen in Figure \ref{cap4:compconfig}. 
 
 \begin{figure}
 	\begin{center}
@@ -140,12 +147,15 @@ Filtering for our tools and Parceive has been enabled and is identical. System l
 				
 		\textbf{source.yaml}
 		\inputminted[linenos, fontsize=\scriptsize]{yaml}{../tests/emptysource.yaml}
+
+		\textbf{tracksource.yaml}
+		\inputminted[linenos, fontsize=\scriptsize]{yaml}{../tests/tracksource.yaml}
 		
 		\textbf{blacklist.xml}
-		\inputminted[linenos, fontsize=\scriptsize]{xml}{blacklist.xml}
+		\inputminted[linenos, fontsize=\scriptsize]{xml}{../tests/blacklist.xml}
 		
 		\textbf{filter.xml}
-		\inputminted[linenos, fontsize=\scriptsize]{xml}{filter.xml}
+		\inputminted[linenos, fontsize=\scriptsize]{xml}{../tests/filter.xml}
 	\end{center}
 	\caption{Filters and tags used for comparison}
 	\label{cap4:compconfig}
@@ -154,6 +164,10 @@ Filtering for our tools and Parceive has been enabled and is identical. System l
 \subsection{Disk cache}
 
 Before executing each test the disk cache is dropped.
+
+\begin{lstlisting}[style=BashInputStyle]
+sudo bash -c 'echo 3 > /proc/sys/vm/drop_caches'
+\end{lstlisting}
 
 \subsection{Results}
 
@@ -164,17 +178,15 @@ Before executing each test the disk cache is dropped.
 	\hline 
 	Pin JIT & 0m0.298s & 0m20.598s & 0m21.513s \\ 
 	\hline 
-	Pin probe mode & ? & ? & ? \\ 		
+	Pin probe mode & \multicolumn{3}{c}{Crash} \\ 		
 	\hline 
 	Parceive & 0m15.273s & 1m26.135s & 5m51.329s \\ 
 	\hline 
 	Memcheck & 0m0.262s & 1m58.874s & 1m30.530s \\ 
 	\hline 
-	\texttt{pintool\_static.so} &  & &  \\ 
+	\texttt{pintool\_static.so} & 0m0.259s & 0m1.412s & 0m0.236s \\ 
 	\hline
-	\texttt{pintool\_dynamic.so} &  & &  \\
+	\texttt{pintool\_dynamic.so} No memory & 0m0.347s & 0m22.604s & 0m34.107s \\
 	\hline
-	\texttt{pintool\_static.so} No memory &  & &  \\ 
-	\hline
-	\texttt{pintool\_dynamic.so} No memory &  & &  \\
+	\texttt{pintool\_dynamic.so} & 0m0.366s & 0m24.791s & 0m45.286s \\
 \end{tabular} 
