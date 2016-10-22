@@ -1,10 +1,12 @@
 \chapter{Implementation}
 
+Chapter 3 describes the implementation of our analysis framework. Section 1 is an \textit{Introduction} and explains the structure, architecture and workflow of our tools. Next we present two \textit{Concepts} that we have introduced to allow users to specify the parts of the application that interests them. In Section 3 we describe our \textit{Database layout}. Next we introduce our two tools \texttt{pintool\_static.so} and \texttt{pintool\_dynamic.so}. Section 6, \textit{Database writing}, explains how we efficiently use SQLite to store information. Next we describe the \textit{Analyses} we perform on the data to extract information that is useful to the user. Lastly we describe how we present the result of the analyses using \textit{Visualizations}.
+
 \section{Introduction}
 
 \subsection{Tools}
 
-As part of this thesis two tools have been developed to gather information about an application:
+As part of this thesis two tools for x86-64 linux have been developed to gather information about an application:
 
 \texttt{pintool\_static.so} analyses the application and all its shared libraries and creates a database with all the locations in the source code where a tag can be placed. More details are present in Section \ref{cap3:pintoolstatic}.
 
@@ -161,7 +163,9 @@ A \textbf{TagInstruction} specifies that a \textbf{SourceLocation} either starts
 
 During execution \textbf{TagInstances} are stored in the database to represent each continuous stream of instructions that are part of a \textbf{Tag}. Instructions can belong to multiple \textbf{TagInstances} at the same time to allow for more flexibility.
 
-Tag and TagInstructions are specified in a simple yaml file as can be seen in Figure \ref{cap3:source-example}. This example defines a section around a loop with a tasks starting at each iteration.
+Tag and TagInstructions are specified in a simple yaml file as can be seen in Figure \ref{cap3:source-example}. This example defines a section around a loop with a tasks starting at each iteration. This file is created using the Parceive UI as the locations are ids taken from the database and can not be easily manipulated by the user. Chapter 1 shows an example of how this is done.
+
+\textbf{TagInstructions} have the precision of source code lines. We consider that one has been hit as soon as any of the instructions that are part of that line execute. Multiple \textbf{TagInstructions} can refer to the same line and they are applied in the order of their definition.
 
 \begin{figure}
 	\begin{center}
@@ -183,9 +187,42 @@ Tag and TagInstructions are specified in a simple yaml file as can be seen in Fi
 	\label{cap3:source-example}
 \end{figure}
 
+\subsubsection{Ignoring conflicts}
+
+When determining if a section of code can be parallelized the user will need to ignore certain conflicts that will not be an issue during refactoring. The simplest example is an iterator for a loop that is used to access the elements of an array.
+
+\texttt{pintool\_dynamic.so} can be configured to ignore specific stack variables during analysis. This allows users to eliminate the conflicts related to that specific variable. Figure \ref{cap3:ignore-example} shows how the filtering is configured. A local variable for a specific function is ignored based on its position on the stack.
+
+\begin{figure}
+	\begin{center}
+		\begin{minted}{yaml}
+{
+  "tags": [ ... ],
+  "tagInstructions": [ ... ],
+  "ignore": [
+    {"function": 1, "delta": -20}
+  ]
+}
+		\end{minted}
+	\end{center}
+	\caption{\texttt{source.yaml} example}
+	\label{cap3:ignore-example}
+\end{figure}
+
 \section{Database layout}
 
-Additional tables have been added to the parceive database to store information about tags and the layout of the source code. The \texttt{SourceLocation} table contains all locations in the code that are referenced in the debug information and can be used for tags.
+Additional tables have been added to the Parceive database to store information about tags and the layout of the source code. Figure \ref{cap3:dblayout} shows the additional tables added.
+
+\begin{sidewaysfigure}
+	\centering
+	\includegraphics[width=1\textwidth]{new-schema}
+	\caption{New database layout}
+	\label{cap3:dblayout}
+\end{sidewaysfigure}
+
+The \texttt{SourceLocation} table contains all locations in the code that are referenced in the debug information and can be used for tags. It is used to share information between \texttt{pintool\_static.so} and \texttt{pintool\_dynamic.so}.
+
+The \texttt{Tag} and \texttt{TagInstruction} tables make the tagging information provided to the analysis available to the visualizations. The \texttt{TagInstance}, \texttt{InstructionTagInstance} and \texttt{Confict} tables contain the information obtained by \texttt{pintool\_dynamic.so}.
 
 \section{pintool\_static.so}
 \label{cap3:pintoolstatic}
@@ -194,7 +231,7 @@ Additional tables have been added to the parceive database to store information 
 
 Performing the analysis generates a database of all locations where a tag can be inserted into the application source code. This data is extracted from debug information in the executable and loaded libraries. This step allows the system to ensure that tags can be related to addresses in a running program.
 
-Debug information is extracted by using \texttt{PIN\_GetSourceLocation} \cite{pindoc} for every instruction. This is a costly operation, but filtering can reduce the number of instructions that are instrumented.
+Debug information is extracted by using \texttt{PIN\_GetSourceLocation} \cite{pindoc} for every instruction. This is a costly operation, but filtering can reduce the number of instructions that are analyzed.
 
 \subsubsection{Architecture}
 
@@ -227,11 +264,11 @@ The \texttt{Image}, \texttt{File}, \texttt{Function} and \texttt{SourceLocation}
 
 The architecture of \texttt{pintool\_dynamic.so} as can be seen in Figure \ref{cap3:dynamic-arch} is much more complex compared to the previous tool. Using the Fast buffer API has allowed us to cleanly separate the static analysis from the tracing that is performed.
 
-The central component of this tool is the \texttt{Manager} class. It is a singleton that represents the state of the running program and is used to store information that is relevant for both analysis and tracing. Since calls to it are made from different threads calls to its methods and accesses to its members must be synchronized.
+The central component of this tool is the \texttt{Manager} class. It is a singleton that represents the state of the running program and is used to store information that is relevant for both static analysis and tracing. Since calls to it are made from different threads calls to its methods and accesses to its members must be synchronized.
 
-Each thread of the instrumented application is handled by a unique \texttt{ThreadManager}. It stores information relevant only to the specific thread and implements the buffer processing.
+Each thread of the instrumented application is handled by a unique \texttt{ThreadManager}. It stores the state of a specific thread and implements the buffer processing.
 
-Static analysis is performed in the \texttt{ImageLoad} callback. Here the relationship between the \texttt{TagInstructions} and their corresponding instruction addresses is established. Inserting instrumentation at this point in time is not allowed by the Pin API and has been deferred to the \texttt{Trace} callback.
+Static analysis is performed in the \texttt{ImageLoad} callback. Here the relationship between the \texttt{TagInstructions} and their corresponding program instruction addresses is established. Inserting instrumentation at this point in time is not allowed by the Pin API and has been deferred to the \texttt{Trace} callback.
 
 The \texttt{Trace} callback is called whenever new code is added to Intel Pins code cache \cite{pindoc}. Here we instrument the instructions that were marked by the static analysis.
 
@@ -252,10 +289,6 @@ Many events are recorder in the buffer and the context of these events is record
 \textbf{Tag} is recorded when a tagged instruction is encountered.
 
 \textbf{MemRef} represents that a instruction has accessed one or more memory locations.
-
-\textbf{AllocEnter} is recorded when the first instruction of a memory allocator function is executed.
-
-\textbf{Free} is recorded when the first instruction of \texttt{free} executed.
 
 \subsubsection{Shadow Call Stack}
 
@@ -287,15 +320,17 @@ Stack variable information is maintained in the shadow call stack. Currently \te
 
 Global variables are often used in programs and have the lifetime of the entire program. They are allocated on first use and are deallocated at the end of the execution.
 
-Dynamically allocated memory requires the most complex handling. Calls to all memory allocation functions, \texttt{malloc}, \texttt{realloc} and \texttt{calloc}, and to \texttt{free} are intercepted to determine the lifetime of references. Due to the inability to find return instructions in these functions, routine instrumentation has been used.
+Dynamically allocated memory requires the most complex handling. Calls to all memory allocation functions, \texttt{malloc}, \texttt{realloc} and \texttt{calloc}, and to \texttt{free} are intercepted. Due to the inability to reliably find the return instructions in these functions, they have been completely replaced with wrappers. This ensures that all dynamically allocated references are known to \texttt{pintool\_dynamic.so}.
 
-The processing of buffers happens later than the routine instrumentation and the allocations detected by both processes must be correlated. This is done by storing the TSC of the function calls in both implementations and their relation can be easily established.
+Unfortunately the wrappers are executed immediately when encountered and the events stored in the buffer are only processed later. Pin does not offer any method to insert entries into the buffers in callbacks, so we must combine the two event sources ourselves. This is achieved by storing the TSC for each call to the wrappers and processing their data only together with the buffers. 
 
 \subsubsection{Memory accesses}
 
 All memory accesses made by unfiltered instructions are instrumented using the fast buffer API. This allows users and analyses to detect data and control dependencies in the application.
 
 All accesses are instrumented, but only some are recorded in the database. This filtering is performed at run-time using tags as explained in Section \ref{controllingtracing}. This feature has been implemented due to the problems that Parceive \cite{parceive} has had with the large amounts of uninteresting accesses stored in the database.
+
+By performing analysis during instrumentation and storing the results we must only need to record the actual addresses used during execution. To reduce the size of buffer entries the number of addresses that are recorded for each instruction can not exceed 7. This limit can be easily increased, but we have not observed any instruction that accesses more locations. 
 
 \subsubsection{Reference resolution}
 
@@ -310,6 +345,12 @@ Each \texttt{ThreadManager} is able to determine the memory reference that conta
 \end{enumerate}
 
 All memory allocations (\texttt{malloc}, \texttt{calloc}, \texttt{realloc}) and deallocations (\texttt{free}) are instrumented in order to determine their lifetimes. The only way this can be done reliably on linux with Intel Pin is to replace the functions completely with a wrapper that calls the actual implementations and stores information about each call.
+
+\subsection{Conflicts}
+
+Conflict detection is performed during the the dynamic analysis. We have attempted to postpone the analysis, but for performance reasons this is not feasible. All the information required for the conflict detection is already available during execution and can be used to perform the detection without noticeable overhead.
+
+The conflicts detection depends on the specific analysis being performed and is described in detail in their respective sections.
 
 \section{Database writing}
 

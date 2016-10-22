@@ -1,5 +1,7 @@
 \chapter{Background}
 
+In this chapter we will present concepts and existing tools relevant to this thesis. The first section presents \textit{Parallelization} and how it can be achieved in existing applications. Next we introduce \textit{Dynamic binary instrumentation} and how it can be used to analyze the runtime behavior of applications. Section 3 is a brief overview of \textit{SQLite}. Next we present \textit{Visualizations} and how they can be displayed in the browser. The last section presents \textit{Parceive}, a tool with which our implementation is compatible and is used to display the results of our analysis.
+
 \section {Parallelization}
 
 \subsection{Introduction}
@@ -72,6 +74,7 @@ A pipeline \cite{parbook} is a linear sequence of processing stages that transfo
 The speedup obtained by a pipeline is limited by the number of parallel stages that can be implemented. For the example in Figure \ref{cap2:pipeline} this is 3. Increasing the number of processors above this value will not provide any additional performance benefits.
 
 \subsection{Dependencies}
+\label{cap2:dependencies}
 
 Sequential programs expect instructions to be executed in the order specified in the program. Parallelizing sections of programs violates this assumption and may cause unexpected behavior if the implicit dependencies between the tasks are not respected.
 
@@ -188,6 +191,7 @@ The most important features of SVG used by visualizations are:
 \end{itemize}
 
 \section{Parceive}
+\label{cap2:parceve}
 
 Parceive \cite{parceive} is a tracing-based tool for parallelizing existing sequential software. It focuses on high-level architecture analysis, but also gathers fine-grained memory accesses and call information.
 
@@ -195,40 +199,13 @@ Parceive \cite{parceive} is a tracing-based tool for parallelizing existing sequ
 
 In Figure \ref{parceive:architecture} we can see the overall architecture of the Parceive project. Parceive is based on Intel Pin and is designed to store a trace of the application in a SQLite database. This database is then processed to improve the performance of visualizations that access information from it. A simple NodeJS acts as a bridge between the browser and the database. Views access data using a Object Relational Mapping that performs multiple optimizations to improve throughput. The visualization framework organizes the display of visualizations on the page and implements state management.
 
-\begin{sidewaysfigure}
-	\begin{tikzpicture}[auto, scale=0.6, node distance=1.5cm,>=latex']
-	\tikzset{block/.style= {draw, scale=1, rectangle, align=center,minimum height=1cm}}
-	\tikzset{blockred/.style= {line width=1.0pt, draw, scale=1, rectangle, draw=blue, align=center,minimum height=1cm}}
-	\tikzset{browserframe/.style= {thick, draw=blue, dotted,inner sep=0.2em}}
-	\tikzset{above/.style= {scale=0.6}}
-	\tikzset{free/.style= {align=center,scale=0.8}}			
-	
-	\node [blockred] (nodejs) {NodeJS Server};
-	\node [block, left = of nodejs] (database) {Database};
-	\node [block, left = of database] (parceive) {Parceive};
-	\node [blockred, below = of database] (processing) {Processing};
-	\node [block, left = of parceive] (application) {Application};
-	\node [blockred, below = of nodejs] (orm) {ORM};
-	\node [blockred, right = of orm] (framework) {View Framework};
-	\node [blockred, below = of orm] (cct) {CCT View};
-	\node [block, below = of framework] (profiling) {Profiling View};
-	\node [browserframe,fit=(orm)(framework)(cct)(profiling)] (browser) {};
-	\node [free, above of = browser, yshift=1.5cm]{Browser};			
-	
-	\draw[->] (parceive) -- node[above] {traces} (application);
-	\draw[->] (parceive) -- node[above] {generates} (database);
-	\draw[<->] (database) -- (processing);
-	\draw[->] (nodejs) -- node[above] {reads} (database);
-	\draw[->] (orm) -- node[above] {uses} (nodejs);
-	\draw[->] (cct) -- (orm);
-	\draw[->] (cct) -- (framework);
-	\draw[->] (profiling) -- (orm);
-	\draw[->] (profiling) -- (framework);
-	\end{tikzpicture}
+\begin{figure}
+	\centering
+	\includegraphics[width=0.6\textwidth]{parceive}
 	
 	\caption{Parceive architecture}
 	\label{parceive:architecture}
-\end{sidewaysfigure}
+\end{figure}
 
 \subsection{Pin tool}
 
